@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="pt-8 pb-5">
+  <p class="eyebrow">Narrative Trends</p>
+  <h2 class="mt-2 text-[22px] font-semibold tracking-tight text-ink">How coverage evolves over time</h2>
+  <p class="mt-2 text-[13.5px] text-ink2 max-w-xl leading-relaxed">Track how framing, sentiment, and similarity shift as reporting on the same event continues.</p>
+</section>
+
+<section class="pb-5">
+  <div class="panel">
+    <div class="flex flex-wrap gap-2.5">
+      <select class="filter-select"><option>All dimensions</option>{% for d in filters.dimensions %}<option>{{ d }}</option>{% endfor %}</select>
+      <select class="filter-select"><option>All events</option>{% for e in filters.events %}<option>{{ e }}</option>{% endfor %}</select>
+      <select class="filter-select"><option>All sources</option>{% for s in filters.sources %}<option>{{ s }}</option>{% endfor %}</select>
+    </div>
+  </div>
+</section>
+
+<section class="pb-6">
+  <div class="panel">
+    <h3 class="panel-title">Narrative Shift Timeline</h3>
+    <p class="panel-subtitle">How framing intensity moves over time, per dimension.</p>
+    <div id="chart-narrative-evolution" class="mt-2" style="height:300px;"></div>
+    <p class="note">How emphasis changed across coverage of the same event, as follow-up reporting shifts which framing dimension gets the most weight.</p>
+  </div>
+</section>
+
+<section class="pb-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+  <div class="panel">
+    <h3 class="panel-title">Semantic Similarity Over Time</h3>
+    <p class="panel-subtitle">How closely each source's coverage tracks the others as a story develops.</p>
+    <div id="chart-similarity-over-time" class="mt-2" style="height:280px;"></div>
+  </div>
+  <div class="panel">
+    <h3 class="panel-title">Sentiment Shift</h3>
+    <p class="panel-subtitle">Share of positive, neutral, and negative coverage over time.</p>
+    <div id="chart-sentiment-shift" class="mt-2" style="height:280px;"></div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,264 @@
+/* ---------- base ---------- */
+::selection { background: rgba(76, 201, 240, 0.25); }
+
+html { scroll-behavior: smooth; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #22272f; border-radius: 10px; border: 2px solid #090B0F; }
+::-webkit-scrollbar-thumb:hover { background: #2c3340; }
+
+/* ---------- sidebar nav ---------- */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #9CA3AF;
+  transition: background-color .15s ease, color .15s ease;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: #F3F4F6; }
+.nav-item-active {
+  background: rgba(76, 201, 240, 0.10);
+  color: #4CC9F0;
+  box-shadow: inset 0 0 0 1px rgba(76, 201, 240, 0.18);
+}
+.nav-item-active:hover { color: #4CC9F0; background: rgba(76, 201, 240, 0.12); }
+.nav-item-disabled { opacity: 0.5; cursor: default; }
+.nav-item-disabled:hover { background: transparent; color: #9CA3AF; }
+
+/* ---------- hero eyebrow ---------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #4CC9F0;
+}
+.eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #4CC9F0;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* ---------- kpi cards ---------- */
+.kpi-card {
+  background: #0F1217;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.kpi-card:hover { border-color: rgba(76, 201, 240, 0.25); transform: translateY(-1px); }
+
+/* ---------- panels ---------- */
+.panel {
+  background: #0F1217;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 20px;
+  height: 100%;
+}
+.panel-title { font-size: 14.5px; font-weight: 600; color: #F3F4F6; letter-spacing: -0.01em; }
+.panel-subtitle { margin-top: 3px; font-size: 12.5px; color: #9CA3AF; }
+.note { margin-top: 12px; font-size: 11.5px; color: #6B7280; line-height: 1.5; }
+
+/* ---------- same-event cards ---------- */
+.event-card {
+  background: #0F1217;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.event-card:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-2px); }
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #14181F;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 7px;
+  padding: 7px 9px;
+}
+
+.entity-pill {
+  font-size: 11px;
+  color: #9CA3AF;
+  background: #14181F;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+/* ---------- tables ---------- */
+.table-row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background-color .15s ease; }
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: rgba(255,255,255,0.02); }
+
+.type-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2.5px 7px;
+  border-radius: 5px;
+  letter-spacing: 0.01em;
+}
+.type-person { color: #4CC9F0; background: rgba(76, 201, 240, 0.10); }
+.type-location { color: #4ADE80; background: rgba(74, 222, 128, 0.10); }
+.type-organization { color: #FBBF24; background: rgba(251, 191, 36, 0.10); }
+
+/* ---------- responsive: sidebar overlay on small screens ---------- */
+@media (max-width: 1023px) {
+  #sidebar.open { transform: translateX(0); }
+  #sidebar-backdrop.open { display: block; }
+}
+
+/* ---------- plotly modebar / hover polish ---------- */
+.js-plotly-plot .plotly .modebar { display: none !important; }
+
+/* ==========================================================================
+   Intro sequence: brand name reveals letter by letter, then the dashboard
+   fades/scales in underneath as the overlay dissolves.
+   ========================================================================== */
+#intro-overlay {
+  transition: opacity .65s cubic-bezier(.65,0,.35,1), transform .65s cubic-bezier(.65,0,.35,1);
+}
+#intro-overlay.intro-exit {
+  opacity: 0;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+
+.intro-mark {
+  opacity: 0;
+  transform: scale(.8);
+  transition: opacity .5s ease, transform .5s cubic-bezier(.34,1.56,.64,1);
+}
+.intro-mark.in { opacity: 1; transform: scale(1); }
+
+.intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(6px);
+  transition: opacity .7s cubic-bezier(.19,1,.22,1),
+              transform .7s cubic-bezier(.19,1,.22,1),
+              filter .7s ease;
+}
+.intro-letter.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+.intro-tagline {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.intro-tagline.in { opacity: 1; transform: translateY(0); }
+
+.app-shell {
+  opacity: 0;
+  transform: scale(.98);
+}
+.app-shell.app-in {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity .7s cubic-bezier(.19,1,.22,1), transform .7s cubic-bezier(.19,1,.22,1);
+}
+
+/* ==========================================================================
+   Button "fill on hover" effect: a color sweep expands from the left edge
+   behind the label/icon when the cursor enters the button.
+   ========================================================================== */
+.btn-fill {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.btn-fill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .4s cubic-bezier(.65,0,.35,1);
+  z-index: -1;
+}
+.btn-fill:hover::before { transform: scaleX(1); }
+
+.btn-fill-accent {
+  transition: color .4s cubic-bezier(.65,0,.35,1), transform .15s ease;
+}
+.btn-fill-accent::before { background: #4CC9F0; }
+.btn-fill-accent:hover { color: #06141C; }
+
+.btn-fill-subtle {
+  transition: color .3s ease;
+}
+.btn-fill-subtle::before { background: rgba(76, 201, 240, 0.14); }
+.btn-fill-subtle:hover { color: #4CC9F0; }
+/* don't double up the tint on an already-active nav item */
+.nav-item-active.btn-fill::before { content: none; }
+
+.btn-fill-ghost::before { background: rgba(255,255,255,0.06); }
+.btn-fill-ghost { transition: color .3s ease, border-color .3s ease; }
+
+.btn-fill-light::before { background: rgba(255,255,255,0.22); }
+
+/* ==========================================================================
+   New page components: forms, toggles, activity feed, profile
+   ========================================================================== */
+.field-label { font-size: 11.5px; font-weight: 500; color: #9CA3AF; margin-bottom: 6px; display: block; }
+.field-input {
+  width: 100%;
+  background: #14181F;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #F3F4F6;
+  transition: border-color .15s ease;
+}
+.field-input:focus { outline: none; border-color: rgba(76,201,240,0.45); }
+.field-input::placeholder { color: #6B7280; }
+
+.toggle { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; background: #22272F; border-radius: 999px;
+  transition: background-color .2s ease; cursor: pointer;
+}
+.toggle-track::before {
+  content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px;
+  background: #9CA3AF; border-radius: 50%; transition: transform .2s ease, background-color .2s ease;
+}
+.toggle input:checked + .toggle-track { background: rgba(76,201,240,0.25); }
+.toggle input:checked + .toggle-track::before { transform: translateX(16px); background: #4CC9F0; }
+
+.activity-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.activity-item:last-child { border-bottom: none; }
+.activity-dot { width: 6px; height: 6px; border-radius: 50%; background: #4CC9F0; margin-top: 6px; flex-shrink: 0; }
+
+.avatar-lg {
+  width: 56px; height: 56px; border-radius: 50%; background: #191E26;
+  border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center;
+  justify-content: center; font-size: 18px; font-weight: 600; color: #9CA3AF;
+}
+
+.filter-select {
+  background: #14181F;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: #F3F4F6;
+}
+.filter-select:focus { outline: none; border-color: rgba(76,201,240,0.4); }

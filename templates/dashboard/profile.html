@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="pt-8 pb-6">
+  <div class="panel flex flex-wrap items-center gap-5">
+    <div class="avatar-lg">{{ profile.initials }}</div>
+    <div class="min-w-0">
+      <h2 class="text-[19px] font-semibold text-ink">{{ profile.name }}</h2>
+      <p class="text-[13px] text-ink2">{{ profile.role }} · {{ profile.organization }}</p>
+    </div>
+    <div class="flex-1"></div>
+    <button class="btn-fill btn-fill-ghost border border-border rounded-nl px-3.5 py-2 text-[12.5px] text-ink2"
+            onclick="window.NLShowToast && window.NLShowToast('Editing profile isn\'t part of this prototype yet.')">
+      Edit profile
+    </button>
+  </div>
+</section>
+
+<section class="pb-6 grid grid-cols-1 lg:grid-cols-3 gap-3">
+  {% for stat in profile.stats %}
+  <div class="kpi-card">
+    <p class="text-[11.5px] text-ink3">{{ stat.label }}</p>
+    <p class="mt-1.5 font-mono text-[22px] font-semibold text-ink">{{ stat.value }}</p>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="pb-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+  <div class="panel">
+    <h3 class="panel-title">About</h3>
+    <p class="mt-3 text-[13.5px] text-ink2 leading-relaxed">{{ profile.bio }}</p>
+  </div>
+
+  <div class="panel">
+    <h3 class="panel-title">Recent Activity</h3>
+    <div class="mt-2">
+      {% for item in profile.activity %}
+      <div class="activity-item">
+        <span class="activity-dot"></span>
+        <p class="text-[13px] text-ink2 leading-snug">
+          {{ item.action }} <span class="text-ink">{{ item.target }}</span>
+          <span class="block text-[11px] text-ink3 mt-0.5">{{ item.time }}</span>
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

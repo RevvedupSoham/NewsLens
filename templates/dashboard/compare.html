@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="pt-8 pb-5 flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <p class="eyebrow">Compare</p>
+    <h2 class="mt-2 text-[22px] font-semibold tracking-tight text-ink">{{ event_label }}</h2>
+    <p class="mt-1 text-[13px] text-ink2">Choose an event to see how coverage differs across sources.</p>
+  </div>
+  <form method="get" class="flex items-center gap-2">
+    <select name="event" onchange="this.form.submit()" class="filter-select">
+      {% for e in events %}
+        <option value="{{ e.slug }}" {% if e.slug == active_event %}selected{% endif %}>{{ e.label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</section>
+
+<section class="pb-6">
+  <div class="panel">
+    <h3 class="panel-title">Source Comparison Matrix</h3>
+    <p class="panel-subtitle">Every tracked article covering this event, across sources.</p>
+    <div class="mt-3 overflow-x-auto">
+      <table class="w-full text-[13px]">
+        <thead>
+          <tr class="text-left text-ink3 text-[11px] border-b border-border">
+            <th class="pb-2 font-medium">Source</th>
+            <th class="pb-2 font-medium">Title</th>
+            <th class="pb-2 font-medium">Sentiment</th>
+            <th class="pb-2 font-medium">Emotion</th>
+            <th class="pb-2 font-medium">Topic</th>
+            <th class="pb-2 font-medium">Frame</th>
+            <th class="pb-2 font-medium text-right">Similarity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in matrix %}
+          <tr class="table-row">
+            <td class="py-2.5 font-medium text-ink whitespace-nowrap">{{ row.source }}</td>
+            <td class="py-2.5 text-ink2 max-w-sm">{{ row.title }}</td>
+            <td class="py-2.5 whitespace-nowrap {% if row.sentiment == 'Negative' %}text-negative{% elif row.sentiment == 'Positive' %}text-positive{% else %}text-neutral{% endif %}">{{ row.sentiment }}</td>
+            <td class="py-2.5 text-ink2 whitespace-nowrap">{{ row.emotion }}</td>
+            <td class="py-2.5 whitespace-nowrap"><span class="entity-pill">{{ row.topic }}</span></td>
+            <td class="py-2.5 text-ink2 whitespace-nowrap">{{ row.frame }}</td>
+            <td class="py-2.5 text-right font-mono text-ink2">{{ row.similarity }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="pb-10 grid grid-cols-1 xl:grid-cols-2 gap-5">
+  <div class="panel">
+    <h3 class="panel-title">Narrative Fingerprint</h3>
+    <p class="panel-subtitle">Overlaid framing-dimension profile, one shape per source.</p>
+    <div id="chart-narrative-fingerprint" class="mt-2" style="height:320px;"></div>
+  </div>
+
+  <div class="panel">
+    <h3 class="panel-title">Narrative Differences</h3>
+    <p class="panel-subtitle">Analytical indicators of relative emphasis — not judgments of bias or accuracy.</p>
+    <ul class="mt-4 flex flex-col gap-3">
+      {% for line in differences %}
+      <li class="flex gap-2.5 text-[13px] text-ink2 leading-relaxed">
+        <i data-lucide="git-branch" class="w-4 h-4 text-accent shrink-0 mt-0.5"></i>
+        <span>{{ line }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% endblock %}

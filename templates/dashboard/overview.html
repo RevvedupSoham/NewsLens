@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="pt-8 pb-6 border-b border-border">
+  <p class="eyebrow">News Intelligence</p>
+  <h2 class="mt-2 text-[26px] md:text-[32px] font-semibold tracking-tight text-ink leading-[1.15] max-w-2xl">
+    See how the story changes when the source changes.
+  </h2>
+  <p class="mt-3 text-[14px] text-ink2 max-w-xl leading-relaxed">
+    Compare narrative framing, emotional signals, themes, entities, and semantic
+    patterns across multiple reports of the same event.
+  </p>
+  <div class="mt-4 flex items-center gap-2 text-[12.5px] text-ink2">
+    <span class="relative flex h-1.5 w-1.5">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-positive opacity-60"></span>
+      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-positive"></span>
+    </span>
+    Analysis engine ready
+  </div>
+</section>
+
+<!-- KPI STRIP -->
+<section class="grid grid-cols-2 md:grid-cols-5 gap-3 py-6 border-b border-border">
+  {% for kpi in kpis %}
+  <div class="kpi-card">
+    <p class="text-[11.5px] text-ink3">{{ kpi.label }}</p>
+    <p class="mt-1.5 font-mono text-[22px] font-semibold text-ink tracking-tight">{{ kpi.value }}</p>
+    <p class="mt-1 text-[11px]
+      {% if kpi.tone == 'positive' %}text-positive{% elif kpi.tone == 'negative' %}text-negative{% elif kpi.tone == 'warning' %}text-warn{% else %}text-ink3{% endif %}">
+      {{ kpi.delta }}
+    </p>
+  </div>
+  {% endfor %}
+</section>
+
+<!-- NARRATIVE LANDSCAPE -->
+<section class="py-6 border-b border-border">
+  <div class="panel">
+    <div class="flex items-start justify-between flex-wrap gap-2">
+      <div>
+        <h3 class="panel-title">Narrative Landscape</h3>
+        <p class="panel-subtitle">How strongly different sources emphasize each framing dimension.</p>
+      </div>
+    </div>
+    <div id="chart-narrative-landscape" class="mt-2" style="height:340px;"></div>
+    <p class="note">Framing dimensions represent analytical indicators, not objective measures of bias.</p>
+  </div>
+</section>
+
+<!-- SAME EVENT, DIFFERENT STORY -->
+<section class="py-6 border-b border-border">
+  <h3 class="panel-title">Same Event. Different Story.</h3>
+  <p class="panel-subtitle">Compare how three sources describe the same event — <span class="text-ink2">{{ same_event.event_name }}</span></p>
+
+  <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+    {% for card in same_event.cards %}
+    <article class="event-card">
+      <div class="flex items-center justify-between">
+        <span class="text-[13px] font-semibold text-ink">{{ card.source }}</span>
+        <span class="text-[11px] text-ink3">{{ card.time }}</span>
+      </div>
+      <h4 class="mt-2 text-[14px] leading-snug font-medium text-ink">{{ card.headline }}</h4>
+      <p class="mt-2 text-[12.5px] text-ink2 leading-relaxed">{{ card.excerpt }}</p>
+
+      <div class="mt-3 grid grid-cols-2 gap-2 text-[11.5px]">
+        <div class="stat-chip"><span class="text-ink3">Frame</span><span class="text-ink">{{ card.frame }}</span></div>
+        <div class="stat-chip"><span class="text-ink3">Similarity</span><span class="font-mono text-ink">{{ card.similarity }}</span></div>
+        <div class="stat-chip">
+          <span class="text-ink3">Sentiment</span>
+          <span class="{% if card.sentiment == 'Negative' %}text-negative{% elif card.sentiment == 'Positive' %}text-positive{% else %}text-neutral{% endif %}">{{ card.sentiment }}</span>
+        </div>
+        <div class="stat-chip"><span class="text-ink3">Emotion</span><span class="text-ink">{{ card.emotion }}</span></div>
+      </div>
+
+      <div class="mt-3 flex flex-wrap gap-1.5">
+        {% for e in card.entities %}
+        <span class="entity-pill">{{ e }}</span>
+        {% endfor %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FINGERPRINT + EMOTIONAL SIGNAL -->
+<section class="py-6 border-b border-border grid grid-cols-1 lg:grid-cols-2 gap-5">
+  <div class="panel">
+    <h3 class="panel-title">Narrative Fingerprint</h3>
+    <p class="panel-subtitle">A multi-dimensional view of how a source frames the selected event.</p>
+    <div id="chart-narrative-fingerprint" class="mt-2" style="height:300px;"></div>
+  </div>
+
+  <div class="panel">
+    <h3 class="panel-title">Emotional Signal</h3>
+    <p class="panel-subtitle">Detected emotional language across sources.</p>
+    <div id="chart-emotional-signal" class="mt-2" style="height:300px;"></div>
+    <p class="note">Emotional signal reflects detected linguistic patterns within analyzed articles.</p>
+  </div>
+</section>
+
+<!-- TOPICS + ENTITIES -->
+<section class="py-6 border-b border-border grid grid-cols-1 lg:grid-cols-5 gap-5">
+  <div class="panel lg:col-span-2">
+    <h3 class="panel-title">Dominant Themes</h3>
+    <p class="panel-subtitle">Topic distribution across analyzed articles.</p>
+    <div id="chart-topic-distribution" class="mt-2" style="height:280px;"></div>
+  </div>
+
+  <div class="panel lg:col-span-3">
+    <h3 class="panel-title">Entity Intelligence</h3>
+    <p class="panel-subtitle">Frequently mentioned entities across tracked events.</p>
+    <div class="mt-3 overflow-x-auto">
+      <table class="w-full text-[13px]">
+        <thead>
+          <tr class="text-left text-ink3 text-[11px] border-b border-border">
+            <th class="pb-2 font-medium">Entity</th>
+            <th class="pb-2 font-medium">Type</th>
+            <th class="pb-2 font-medium text-right">Mentions</th>
+            <th class="pb-2 font-medium text-right">Sources</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ent in entities %}
+          <tr class="table-row">
+            <td class="py-2.5 text-ink">{{ ent.entity }}</td>
+            <td class="py-2.5">
+              <span class="type-badge type-{{ ent.type|lower }}">{{ ent.type }}</span>
+            </td>
+            <td class="py-2.5 text-right font-mono text-ink2">{{ ent.mentions }}</td>
+            <td class="py-2.5 text-right font-mono text-ink2">{{ ent.sources }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- EVOLUTION + DIVERGENCE -->
+<section class="py-6 border-b border-border grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="panel lg:col-span-2">
+    <h3 class="panel-title">Narrative Evolution</h3>
+    <p class="panel-subtitle">How framing signals change across reporting over time.</p>
+    <div id="chart-narrative-evolution" class="mt-2" style="height:280px;"></div>
+  </div>
+
+  <div class="panel flex flex-col">
+    <h3 class="panel-title">Narrative Divergence</h3>
+    <p class="panel-subtitle">Estimated difference between source-level narrative representations.</p>
+
+    <div class="mt-4 flex items-baseline gap-1.5">
+      <span class="font-mono text-[34px] font-semibold text-warn leading-none">{{ divergence.divergence_pct }}%</span>
+    </div>
+    <div class="mt-2 h-1.5 rounded-full bg-surfacealt overflow-hidden">
+      <div class="h-full bg-warn rounded-full" style="width: {{ divergence.divergence_pct }}%;"></div>
+    </div>
+
+    <div class="mt-5 flex flex-col gap-3 text-[12.5px]">
+      <div class="flex items-center justify-between">
+        <span class="text-ink3">Semantic similarity</span>
+        <span class="font-mono text-ink">{{ divergence.semantic_similarity }}%</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-ink3">Framing distance</span>
+        <span class="font-mono text-ink">{{ divergence.framing_distance }}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-ink3">Emotional distance</span>
+        <span class="font-mono text-ink">{{ divergence.emotional_distance }}</span>
+      </div>
+    </div>
+
+    <p class="note mt-auto pt-4">Analytical metric — not a truth or bias score.</p>
+  </div>
+</section>
+
+<!-- RECENT EVENTS -->
+<section class="py-6">
+  <div class="panel">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <h3 class="panel-title">Recent Events</h3>
+      <span class="text-[11px] text-ink3">Demo data — illustrative only</span>
+    </div>
+
+    <div class="mt-3 overflow-x-auto">
+      <table class="w-full text-[13px]">
+        <thead>
+          <tr class="text-left text-ink3 text-[11px] border-b border-border">
+            <th class="pb-2 font-medium">Event</th>
+            <th class="pb-2 font-medium text-right">Sources</th>
+            <th class="pb-2 font-medium text-right">Articles</th>
+            <th class="pb-2 font-medium">Dominant theme</th>
+            <th class="pb-2 font-medium text-right">Avg. similarity</th>
+            <th class="pb-2 font-medium text-right">Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in recent_events %}
+          <tr class="table-row">
+            <td class="py-2.5 text-ink">{{ ev.event }}</td>
+            <td class="py-2.5 text-right font-mono text-ink2">{{ ev.sources }}</td>
+            <td class="py-2.5 text-right font-mono text-ink2">{{ ev.articles }}</td>
+            <td class="py-2.5"><span class="entity-pill">{{ ev.theme }}</span></td>
+            <td class="py-2.5 text-right font-mono text-ink2">{{ ev.similarity }}</td>
+            <td class="py-2.5 text-right text-ink3">{{ ev.updated }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

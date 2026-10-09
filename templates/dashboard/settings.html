@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="pt-8 pb-5">
+  <p class="eyebrow">Settings</p>
+  <h2 class="mt-2 text-[22px] font-semibold tracking-tight text-ink">Account &amp; pipeline settings</h2>
+  <p class="mt-2 text-[13.5px] text-ink2 max-w-xl leading-relaxed">Nothing here is persisted in this prototype — it's UI-complete so the real save actions can be wired in later.</p>
+</section>
+
+<section class="pb-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+  <div class="panel">
+    <h3 class="panel-title">Profile</h3>
+    <p class="panel-subtitle">Basic account details.</p>
+    <form id="settings-form" class="mt-4 flex flex-col gap-4">
+      <div>
+        <label class="field-label">Name</label>
+        <input class="field-input" type="text" value="{{ settings.profile.name }}" />
+      </div>
+      <div>
+        <label class="field-label">Email</label>
+        <input class="field-input" type="email" value="{{ settings.profile.email }}" />
+      </div>
+      <div>
+        <label class="field-label">Role</label>
+        <select class="field-input">
+          <option {% if settings.profile.role == "Researcher" %}selected{% endif %}>Researcher</option>
+          <option {% if settings.profile.role == "Media Analyst" %}selected{% endif %}>Media Analyst</option>
+          <option {% if settings.profile.role == "Student" %}selected{% endif %}>Student</option>
+        </select>
+      </div>
+      <button type="submit" class="self-start btn-fill btn-fill-accent bg-transparent border border-accent/30 text-accent rounded-nl px-4 py-2 text-[13px] font-semibold">
+        Save changes
+      </button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3 class="panel-title">Notifications</h3>
+    <p class="panel-subtitle">Choose what NewsLens should notify you about.</p>
+    <div class="mt-4 flex flex-col">
+      {% for n in settings.notifications %}
+      <div class="flex items-center justify-between py-2.5 border-b border-border last:border-b-0">
+        <span class="text-[13px] text-ink2">{{ n.label }}</span>
+        <label class="toggle">
+          <input type="checkbox" {% if n.enabled %}checked{% endif %} />
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="pb-10">
+  <div class="panel">
+    <h3 class="panel-title">Analysis Pipeline</h3>
+    <p class="panel-subtitle">Read-only info about the demo pipeline currently running.</p>
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-[13px]">
+      <div class="stat-chip"><span class="text-ink3">Model version</span><span class="text-ink font-mono">{{ settings.pipeline.model_version }}</span></div>
+      <div class="stat-chip"><span class="text-ink3">Mode</span><span class="text-ink">{{ settings.pipeline.mode }}</span></div>
+      <div class="stat-chip"><span class="text-ink3">Demo data</span><span class="text-ink">{{ settings.pipeline.last_seeded }}</span></div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById("settings-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  if (window.NLShowToast) window.NLShowToast("Settings aren't persisted in this prototype yet.");
+});
+</script>
+{% endblock %}
