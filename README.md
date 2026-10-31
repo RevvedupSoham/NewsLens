@@ -1,103 +1,93 @@
-# NewsLens — Dashboard Prototype
+# NewsLens
 
-A Django multi-page dashboard: Overview, Articles, Compare, Analysis,
-Narrative Trends, Settings, and Profile. Dark, editorial, research-
-instrument styling; Tailwind CSS + custom CSS; Plotly.js charts; Lucide
-icons. No React/Vue/Next/Streamlit/Dash — plain Django templates and
-vanilla JS, per the original brief.
+**NewsLens** is a Django research dashboard prototype with a Kaggle-only dataset and ML baseline workflow. The current UI includes Overview, Articles, Compare, Analysis, Narrative Trends, Settings, and Profile.
 
-## Run it
+> **Research integrity note:** Dashboard pages still include illustrative demo values. They are not findings from the Kaggle dataset. The first implemented ML workflow is an ISOT inherited-label baseline for experimentation, not a factuality verdict engine or media-bias detector.
 
-```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+## Current scope
+
+- Dataset source policy: **Kaggle only**.
+- Initial dataset: [Fake and Real News Dataset (ISOT)](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset).
+- Local CSV import, structural validation, TF-IDF + Logistic Regression baseline.
+- Evaluation report with class metrics and confusion matrix.
+- Raw dataset, processed data, trained model, and generated reports remain local and are excluded from Git.
+
+## Setup
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-
-python manage.py migrate        # sets up the (unused) default SQLite tables
+python manage.py migrate
 python manage.py runserver
 ```
 
-Then open **http://127.0.0.1:8000/**.
+Open http://127.0.0.1:8000/.
 
-## What's here
+## Download the dataset
 
-- `config/` — Django project settings/urls (the "project" package).
-- `dashboard/` — the one app the whole site runs on.
-  - `views.py` — one view per sidebar page. Each assembles demo data +
-    the shared chart theme into a JSON payload for its template.
-  - `services.py` — **demo data only**. Shaped exactly like what a real
-    narrative-analysis pipeline would return, so wiring in real data later
-    means changing these functions, not the templates or JS.
-  - `plot_theme.py` — single source of truth for chart colors/fonts/
-    layout, consumed by `static/js/newslens.js` on the client.
-- `templates/` — `base.html` (shell + intro animation), `partials/`
-  (sidebar, header), `dashboard/*.html` (one template per page).
-- `static/css/newslens.css` — the design-system CSS Tailwind's utility
-  classes don't cover: nav states, panels, badges, cards, the intro
-  animation keyframes, and the button hover-fill effect.
-- `static/js/newslens.js` — the intro sequence, sidebar toggle, toast
-  helper (`window.NLShowToast`), and every `Plotly.newPlot(...)` call.
+1. Open the [ISOT Kaggle dataset](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset).
+2. Download the dataset ZIP through Kaggle and inspect its current license/terms.
+3. Extract the original `Fake.csv` and `True.csv` files into `data/raw/ISOT/`.
 
-## Pages
+The raw source CSVs are not tracked. Keep `Fake.csv` and `True.csv` local.
 
-| Page | Route | What it shows |
-|---|---|---|
-| Overview | `/` | KPI strip, narrative landscape, "same event" cards, fingerprint radar, emotional signal, topic donut, entity table, evolution line, divergence metric, recent events |
-| Articles | `/articles/` | Full article table with **client-side** search/source/event/sentiment/topic filtering (no backend call — all done in `articles.html`'s inline JS against the rows already on the page) |
-| Compare | `/compare/?event=<slug>` | Source comparison matrix + narrative fingerprint radar + narrative differences, swappable across 3 demo events via the dropdown (`?event=climate-summit`, `india-budget`, `ai-regulation`) |
-| Analysis | `/analysis/` | Single-article deep dive: entities, keywords, emotion distribution, framing indicators, and a demo SHAP-style explainability chart |
-| Narrative Trends | `/trends/` | Framing-shift timeline, semantic-similarity-over-time, and sentiment-shift charts, with filter dropdowns (UI only — see Scope) |
-| Settings | `/settings/` | Profile form, notification toggles, read-only pipeline info — submit shows a toast, nothing is persisted |
-| Profile | `/profile/` | Avatar, stats, bio, recent-activity feed |
+## Prepare the dataset
 
-## The intro animation
-
-On first load, `#intro-overlay` in `base.html` covers the screen while
-`static/js/newslens.js` reveals the "NewsLens" wordmark letter by letter
-(staggered opacity/blur/translate), then fades the tagline in, then fades
-the overlay out while the dashboard (`#app-shell`) scales/fades in
-underneath. Total runtime is ~2.3s.
-
-By default it only plays **once per browser tab** (`sessionStorage`), so
-navigating between pages afterward is instant — only a fresh tab/session
-replays it. To make it replay on every page load (handy while demoing),
-open `static/js/newslens.js` and flip:
-
-```js
-var INTRO_ONCE_PER_SESSION = true; // set to false
+```powershell
+python scripts/import_isot.py
+python scripts/validate_dataset.py
 ```
 
-## The button "fill on hover" effect
+The importer requires `title` and `text`; it retains `subject` and `date` if available. It generates `data/processed/isot_articles.csv` with `article_id`, `title`, `text`, `article_text`, `label`, `subject`, `date`, and `source_dataset`. The inherited label is mapped from the source file (`Fake.csv` to `fake`, `True.csv` to `real`).
 
-Nav links, the header buttons, and a few page buttons use `.btn-fill`
-(see `newslens.css`): a color sweep expands from the left edge behind the
-label when the cursor enters. Three variants are layered on top of it —
-add whichever fits a given button:
+## Train a baseline
 
-- `.btn-fill-accent` — sweeps in solid accent blue, text flips dark (used where the button itself isn't already accent-colored)
-- `.btn-fill-light` — sweeps a translucent white overlay (used on buttons that already have a solid accent background, like "Analyze Article")
-- `.btn-fill-subtle` — sweeps a faint accent tint, text turns accent-colored (used on sidebar nav links and ghost buttons)
+```powershell
+python scripts/train_baseline.py
+```
 
-## Why charts are built client-side
+Baseline: TF-IDF word unigrams/bigrams + class-weighted Logistic Regression, using a reproducible stratified random holdout (seed 42). Outputs:
 
-The Python `plotly` package isn't a dependency here — `services.py`
-returns plain Python data structures, and `newslens.js` renders them with
-Plotly.js (loaded from a CDN). `plot_theme.py` still centralizes every
-chart's design tokens; each view serializes it into the page once, and
-every chart function in `newslens.js` reads from that same object.
+- `models/isot_tfidf_logreg.joblib`
+- `reports/isot_baseline_metrics.json`
 
-## Scope / known limitations
+The report includes accuracy, macro-F1, per-class precision/recall/F1, and confusion matrix.
 
-- **All data is hardcoded.** Every number and chart across all seven
-  pages is hand-written demo data in `services.py`, shaped the way a real
-  NLP pipeline's output would be shaped — none of it is a real research
-  finding.
-- **No real backend actions.** "Analyze Article," Settings' "Save
-  changes," Profile's "Edit profile," and Articles' row clicks all show a
-  toast rather than doing something real — they're UI-complete stubs for
-  a future backend.
-- **Compare's event switcher** is real (a GET param swapping between 3
-  hardcoded datasets); **Trends' filter dropdowns** are UI-only and don't
-  currently change the charts, since there's only one hardcoded time
-  series today — wire them up once there's more than one to switch
-  between.
+## Interpretation and limitations
+
+- ISOT labels are inherited dataset labels, not independent fact-check judgments for every article.
+- Publisher/source selection, writing style, duplicates, and event/subject distributions may leak label cues.
+- A random split is a pipeline smoke-test, not evidence of generalization. Add duplicate-aware and source-held-out validation before strong claims.
+- Never present a prediction as proof an article is false, a publisher's trustworthiness, or a media-bias score.
+- ISOT does not supply the bias/framing annotations needed for our original narrative research objective.
+- Check the current dataset license, attribution, and usage terms before use or redistribution.
+
+See [Dataset Card](docs/DATASET_CARD_ISOT.md).
+
+## Project structure
+
+- `config/`: Django configuration.
+- `dashboard/`: UI views and service layer; much of the displayed data is mock content.
+- `templates/`: Django pages.
+- `static/`: CSS and JavaScript.
+- `scripts/`: Kaggle CSV import, validation, and baseline training.
+- `data/`: dataset templates and local-data locations.
+
+## Next milestones
+
+1. Connect dataset summary and measured evaluation results to a Django results page.
+2. Add provenance and near-duplicate diagnostics.
+3. Add group-aware evaluation when source metadata permits.
+4. Consider a Kaggle-hosted annotated framing corpus only after reviewing labels and terms.
+5. Replace mock dashboard metrics only with reproducible computed results.
+
+## Current UI caveat
+
+The dashboard remains a visual prototype: some analysis actions, settings persistence, filters, and chart values are hardcoded or stubbed. Do not cite those values as research findings.
+
+## Source
+- [ISOT dataset on Kaggle](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset)

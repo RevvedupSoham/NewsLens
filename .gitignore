@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.sqlite3
+# Local datasets and trained artifacts: obtain data from Kaggle separately
+data/raw/ISOT/*.csv
+data/processed/*.csv
+models/*.joblib
+reports/*.json
+!data/raw/ISOT/README.md
+!data/processed/.gitkeep
+!models/.gitkeep
+!reports/.gitkeep
